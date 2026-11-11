@@ -8,7 +8,8 @@ import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from .constants import (
     C_RESET, C_BOLD, C_GREEN, C_YELLOW, C_CYAN, C_RED, C_BLUE, C_MAGENTA, C_DIM,
-    DEFAULT_COMPANY_ID, DEFAULT_OLLAMA_MODEL, OFFICIAL_NAMES, SEASONAL_ITEM_IDS, RETAIL_STORES
+    DEFAULT_COMPANY_ID, DEFAULT_OLLAMA_MODEL, OFFICIAL_NAMES, SEASONAL_ITEM_IDS, RETAIL_STORES,
+    STORE_HOURLY_WAGES
 )
 from .client import SimCompaniesClient
 from .advisor import StrategicAdvisor
@@ -129,7 +130,9 @@ def compute_all_stores_analysis(prices_by_rq, res_meta, retail_map, cash, includ
             markup = ((p_retail - p_buy) / p_buy) * 100
             profit_unit = p_retail - p_buy
             speed = res_meta.get(rid, {}).get("unitsSoldAnHour", 0.0)
-            profit_hourly = speed * profit_unit
+            gross_hourly = speed * profit_unit
+            wage_hourly = STORE_HOURLY_WAGES.get(store_name, 0.0)
+            net_hourly = gross_hourly - wage_hourly
             affordable_units = int(cash // p_buy) if cash >= p_buy else 0
             name = res_meta.get(rid, {}).get("name", f"Resource {rid}")
 
@@ -142,7 +145,9 @@ def compute_all_stores_analysis(prices_by_rq, res_meta, retail_map, cash, includ
                 "markup": markup,
                 "profit_unit": profit_unit,
                 "speed": speed,
-                "profit_hourly": profit_hourly,
+                "wage_hourly": wage_hourly,
+                "profit_hourly": net_hourly,
+                "gross_hourly": gross_hourly,
                 "affordable": affordable_units
             }
             items_data.append(item_obj)
@@ -169,18 +174,18 @@ def print_top_retail_leaderboard(all_retail_items, store_results, cash):
     print(f"{C_DIM}* Markup % gives return on capital; Speed/hr shows how fast each unit sells per building level.{C_RESET}\n")
 
     top_by_hourly = sorted(all_retail_items, key=lambda x: x["profit_hourly"], reverse=True)
-    print(f"{C_BOLD}{C_CYAN}Top 10 Retail Items by Cash Flow Over Time (/2hr, /8hr, /24hr):{C_RESET}")
-    print(f"{'Item':<18} | {'Store Type':<16} | {'Speed/hr':<8} | {'$/hr':<11} | {'/2hr':<11} | {'/8hr':<11} | {'/24hr':<12} | {'Time/100u'}")
-    print("-" * 112)
+    print(f"{C_BOLD}{C_CYAN}Top 10 Retail Items by True Net Profit After Worker Wages (/2hr, /8hr, /24hr):{C_RESET}")
+    print(f"{'Item':<18} | {'Store Type':<16} | {'Speed/hr':<8} | {'Wage $/h':<9} | {'Net $/hr':<11} | {'/2hr':<11} | {'/8hr':<11} | {'/24hr':<12}")
+    print("-" * 115)
     for it in top_by_hourly[:10]:
-        t_100 = f"{100.0 / it['speed']:.1f}h" if it['speed'] > 0 else "N/A"
         p_hr = it['profit_hourly']
         p_2hr = p_hr * 2.0
         p_8hr = p_hr * 8.0
         p_24hr = p_hr * 24.0
-        print(f"{C_BOLD}{it['name']:<18}{C_RESET} | {it['store']:<16} | {it['speed']:<8.1f} | {C_CYAN}+${p_hr:<9.2f}{C_RESET} | +${p_2hr:<9.2f} | +${p_8hr:<9.2f} | {C_GREEN}+${p_24hr:<10.2f}{C_RESET} | {t_100:<8}")
-    print("-" * 112)
-    print(f"{C_DIM}* Profit estimates calculated per single store level. Scale linearly by building level (e.g. Lvl 2 = 2x).{C_RESET}\n")
+        color = C_GREEN if p_hr > 0 else C_RED
+        print(f"{C_BOLD}{it['name']:<18}{C_RESET} | {it['store']:<16} | {it['speed']:<8.1f} | -${it['wage_hourly']:<7.2f} | {color}+${p_hr:<9.2f}{C_RESET} | +${p_2hr:<9.2f} | +${p_8hr:<9.2f} | {C_GREEN}+${p_24hr:<10.2f}{C_RESET}")
+    print("-" * 115)
+    print(f"{C_DIM}* Net $/hr strictly deducts building worker wages per level (Realm 0 base: $345/h * store salaryModifier).{C_RESET}\n")
 
     print(f"{C_BOLD}{C_YELLOW}Retail Store Power Ranking (Which Store is Best to Build?):{C_RESET}")
     print(f"{'Rank':<6} | {'Store Type':<24} | {'Avg Markup':<13} | {'Top Margin Item':<22} | {'Peak Hourly Item'}")

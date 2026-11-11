@@ -183,6 +183,20 @@ OFFICIAL_NAMES = {
 # Seasonal event IDs
 SEASONAL_ITEM_IDS = {67, 144, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155}
 
+# Base hourly worker salary in Realm 0
+BASE_SALARY_HOUR = 345.0
+
+# Hourly store worker wages per building level (base $345 * salaryModifier)
+STORE_HOURLY_WAGES = {
+    "Grocery Store": BASE_SALARY_HOUR * 0.4,       # $138.00/hr
+    "Hardware Store": BASE_SALARY_HOUR * 0.5,      # $172.50/hr
+    "Fashion Store": BASE_SALARY_HOUR * 0.9,       # $310.50/hr
+    "Electronics Store": BASE_SALARY_HOUR * 0.5,   # $172.50/hr
+    "Gas Station": BASE_SALARY_HOUR * 1.0,         # $345.00/hr
+    "Car Dealership": BASE_SALARY_HOUR * 1.1,      # $379.50/hr
+    "Aerospace Sales Office": BASE_SALARY_HOUR * 1.7  # $586.50/hr
+}
+
 # Mapping of retail stores and active permanent goods
 RETAIL_STORES = {
     "Grocery Store": {

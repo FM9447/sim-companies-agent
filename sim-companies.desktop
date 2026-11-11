@@ -1,0 +1,23 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Sim Companies
+GenericName=Business Simulation Game
+Comment=Play Sim Companies - Online economic simulation and tycoon game
+Icon=sim-companies
+Exec=/home/fm9447/.local/bin/sim-companies %U
+Terminal=false
+Categories=Game;StrategyGame;Simulation;
+StartupWMClass=sim-companies
+Keywords=sim;companies;tycoon;business;economy;simulation;mmo;game;
+Actions=Realm1;Realm2;
+
+[Desktop Action Realm1]
+Name=Play Realm 1: Magnates
+Exec=/home/fm9447/.local/bin/sim-companies
+Icon=sim-companies
+
+[Desktop Action Realm2]
+Name=Play Realm 2: Entrepreneurs
+Exec=/home/fm9447/.local/bin/sim-companies
+Icon=sim-companies

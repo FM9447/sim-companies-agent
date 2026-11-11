@@ -1,0 +1,24 @@
+{
+  "name": "sim-companies",
+  "productName": "Sim Companies",
+  "version": "1.0.0",
+  "description": "Sim Companies - Online Business Simulation Game Desktop Client",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron . --no-sandbox --ozone-platform-hint=auto",
+    "start:wayland": "electron . --no-sandbox --ozone-platform=wayland --enable-features=WaylandWindowDecorations",
+    "start:x11": "electron . --no-sandbox --ozone-platform=x11"
+  },
+  "keywords": [
+    "sim-companies",
+    "simulation",
+    "game",
+    "tycoon",
+    "business"
+  ],
+  "author": "Sim Companies Client",
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^45.2.3"
+  }
+}
